@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Soup Scraper - Premium BeautifulSoup Web Scraping Dashboard</title>
+    
+    <!-- Google Fonts for premium typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom stylesheet -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="glow-bg"></div>
+    <div class="glow-bg-secondary"></div>
+    
+    <div class="app-container">
+        <!-- HEADER -->
+        <header class="app-header animate-slide-down">
+            <div class="logo-area">
+                <div class="logo-icon">
+                    <i class="fa-solid fa-bowl-food"></i>
+                </div>
+                <div>
+                    <h1>Soup Scraper</h1>
+                    <p class="tagline">BeautifulSoup-Powered Web Parsing Engine</p>
+                </div>
+            </div>
+            <div class="server-status">
+                <span class="status-dot online" id="status-indicator"></span>
+                <span id="status-text">Connected to API</span>
+            </div>
+        </header>
+
+        <!-- MAIN LAYOUT -->
+        <main class="dashboard-grid">
+            
+            <!-- SCRAPER CONTROL PANEL -->
+            <section class="card control-panel animate-fade-in">
+                <div class="card-header">
+                    <h2><i class="fa-solid fa-sliders"></i> Scrape Settings</h2>
+                </div>
+                <form id="scraper-form">
+                    <div class="form-group">
+                        <label for="target-url">Target URL</label>
+                        <div class="url-input-container">
+                            <i class="fa-solid fa-link url-icon"></i>
+                            <input type="url" id="target-url" placeholder="https://example.com" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="user-agent">User-Agent Profile</label>
+                            <div class="select-container">
+                                <i class="fa-solid fa-robot"></i>
+                                <select id="user-agent">
+                                    <option value="chrome" selected>Chrome (Desktop)</option>
+                                    <option value="firefox">Firefox (Desktop)</option>
+                                    <option value="safari">Safari (macOS)</option>
+                                    <option value="mobile">Safari (iPhone)</option>
+                                    <option value="bot">Googlebot (Web Crawler)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="custom-selector">Custom CSS Selector <span class="optional-label">(Optional)</span></label>
+                        <div class="input-container">
+                            <i class="fa-solid fa-code"></i>
+                            <input type="text" id="custom-selector" placeholder="e.g. div.content a.article-link">
+                        </div>
+                        <p class="input-tip">Scrape specific elements matches based on query selector rules.</p>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary" id="scrape-btn">
+                        <span>Scrape Webpage</span>
+                        <i class="fa-solid fa-circle-notch fa-spin btn-spinner hidden" id="btn-spinner"></i>
+                    </button>
+                </form>
+            </section>
+
+            <!-- TERMINAL LOGS -->
+            <section class="card terminal-card animate-fade-in" style="animation-delay: 0.1s;">
+                <div class="card-header">
+                    <h2><i class="fa-solid fa-terminal"></i> Activity Log</h2>
+                    <button class="btn btn-sm btn-outline-danger" id="clear-logs" type="button">Clear</button>
+                </div>
+                <div class="terminal-body" id="log-terminal">
+                    <div class="log-line system"><span class="log-time">[20:00:00]</span> Scraper ready. Enter a URL to start parsing.</div>
+                </div>
+            </section>
+            
+            <!-- RESULTS VIEWER CONTAINER -->
+            <section class="card results-card full-width hidden animate-slide-up" id="results-section">
+                <div class="card-header results-header">
+                    <div class="title-meta">
+                        <h2><i class="fa-solid fa-chart-simple"></i> Scraped Results</h2>
+                        <span class="url-badge" id="scraped-url-badge">https://example.com</span>
+                    </div>
+                    <div class="export-actions">
+                        <button class="btn btn-outline" id="export-json"><i class="fa-solid fa-download"></i> Export JSON</button>
+                        <button class="btn btn-outline" id="export-csv"><i class="fa-solid fa-file-csv"></i> Export CSV Summary</button>
+                    </div>
+                </div>
+                
+                <!-- TABS NAVIGATION -->
+                <div class="tabs-nav" id="results-tabs">
+                    <button class="tab-btn active" data-tab="tab-overview"><i class="fa-solid fa-eye"></i> Overview</button>
+                    <button class="tab-btn" data-tab="tab-links"><i class="fa-solid fa-compass"></i> Links <span class="tab-count" id="count-links">0</span></button>
+                    <button class="tab-btn" data-tab="tab-images"><i class="fa-solid fa-image"></i> Images <span class="tab-count" id="count-images">0</span></button>
+                    <button class="tab-btn" data-tab="tab-tables"><i class="fa-solid fa-table"></i> Tables <span class="tab-count" id="count-tables">0</span></button>
+                    <button class="tab-btn" data-tab="tab-selector" id="tab-btn-selector"><i class="fa-solid fa-magnifying-glass"></i> Custom CSS <span class="tab-count" id="count-selector">0</span></button>
+                    <button class="tab-btn" data-tab="tab-html"><i class="fa-solid fa-code"></i> Raw HTML</button>
+                </div>
+                
+                <!-- TAB CONTENTS -->
+                <div class="tabs-content">
+                    
+                    <!-- TAB 1: OVERVIEW -->
+                    <div class="tab-pane active" id="tab-overview">
+                        <div class="overview-grid">
+                            <div class="overview-stats">
+                                <div class="stat-card">
+                                    <div class="stat-icon link"><i class="fa-solid fa-compass"></i></div>
+                                    <div class="stat-details">
+                                        <span class="stat-val" id="stat-links">0</span>
+                                        <span class="stat-label">Links Found</span>
+                                    </div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-icon image"><i class="fa-solid fa-image"></i></div>
+                                    <div class="stat-details">
+                                        <span class="stat-val" id="stat-images">0</span>
+                                        <span class="stat-label">Images Found</span>
+                                    </div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-icon table"><i class="fa-solid fa-table"></i></div>
+                                    <div class="stat-details">
+                                        <span class="stat-val" id="stat-tables">0</span>
+                                        <span class="stat-label">Tables Found</span>
+                                    </div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-icon heading"><i class="fa-solid fa-heading"></i></div>
+                                    <div class="stat-details">
+                                        <span class="stat-val" id="stat-headings">0</span>
+                                        <span class="stat-label">Headings Found</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="info-split">
+                                <div class="page-meta-card">
+                                    <h3>Page Metadata</h3>
+                                    <div class="meta-row">
+                                        <span class="meta-key">Title</span>
+                                        <span class="meta-val" id="page-title-val">Example Domain</span>
+                                    </div>
+                                    <div class="meta-row">
+                                        <span class="meta-key">Status Code</span>
+                                        <span class="meta-val badge-success" id="page-status-val">200 OK</span>
+                                    </div>
+                                    <div class="meta-list" id="meta-tags-list">
+                                        <!-- Dynamic metadata fields -->
+                                    </div>
+                                </div>
+                                
+                                <div class="headings-card">
+                                    <h3>Heading Hierarchy</h3>
+                                    <div class="headings-container" id="headings-structure">
+                                        <!-- Heading breakdown structure -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- TAB 2: LINKS -->
+                    <div class="tab-pane" id="tab-links">
+                        <div class="table-actions">
+                            <div class="search-box">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <input type="text" id="links-search" placeholder="Search and filter links...">
+                            </div>
+                            <button class="btn btn-sm btn-outline" id="download-links-csv"><i class="fa-solid fa-file-csv"></i> Download Links CSV</button>
+                        </div>
+                        <div class="table-wrapper scroll-custom">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Link Text</th>
+                                        <th>Target URL</th>
+                                        <th>Type</th>
+                                        <th style="width: 80px;">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="links-tbody">
+                                    <!-- Dynamic rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- TAB 3: IMAGES -->
+                    <div class="tab-pane" id="tab-images">
+                        <div class="table-actions">
+                            <div class="search-box">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <input type="text" id="images-search" placeholder="Search by description/alt text...">
+                            </div>
+                            <button class="btn btn-sm btn-outline" id="download-images-csv"><i class="fa-solid fa-file-csv"></i> Download Images CSV</button>
+                        </div>
+                        <div class="images-gallery" id="images-grid">
+                            <!-- Dynamic images -->
+                        </div>
+                    </div>
+                    
+                    <!-- TAB 4: TABLES -->
+                    <div class="tab-pane" id="tab-tables">
+                        <div class="table-select-wrapper" id="tables-selector-container">
+                            <label for="table-dropdown">Select Table found:</label>
+                            <div class="select-container inline-select">
+                                <i class="fa-solid fa-table"></i>
+                                <select id="table-dropdown">
+                                    <!-- Dynamic options -->
+                                </select>
+                            </div>
+                            <button class="btn btn-sm btn-outline" id="download-table-csv"><i class="fa-solid fa-file-csv"></i> Download Selected Table CSV</button>
+                        </div>
+                        <div id="table-view-empty" class="tab-empty">
+                            <i class="fa-solid fa-table-cells"></i>
+                            <p>No tables detected on the target page.</p>
+                        </div>
+                        <div class="table-wrapper scroll-custom hidden" id="table-wrapper-results">
+                            <table id="dynamic-scraped-table">
+                                <thead id="scraped-table-head">
+                                    <!-- Dynamic -->
+                                </thead>
+                                <tbody id="scraped-table-body">
+                                    <!-- Dynamic -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- TAB 5: CUSTOM CSS SELECTOR -->
+                    <div class="tab-pane" id="tab-selector">
+                        <div class="table-actions">
+                            <div class="selector-meta-info">
+                                <span>CSS Target:</span> <code id="selector-target-code">div.content</code>
+                                <span class="badge" id="selector-count-badge">0 matches</span>
+                            </div>
+                            <button class="btn btn-sm btn-outline" id="download-selector-csv"><i class="fa-solid fa-file-csv"></i> Download Match Results CSV</button>
+                        </div>
+                        
+                        <div class="selector-results-list scroll-custom" id="selector-matches-container">
+                            <!-- Dynamic selector results -->
+                        </div>
+                    </div>
+                    
+                    <!-- TAB 6: RAW HTML -->
+                    <div class="tab-pane" id="tab-html">
+                        <div class="code-header">
+                            <span>HTML Preview (First 50,000 characters)</span>
+                            <button class="btn btn-sm btn-outline" id="copy-html-btn"><i class="fa-solid fa-copy"></i> Copy Code</button>
+                        </div>
+                        <div class="code-wrapper scroll-custom">
+                            <pre><code class="language-html" id="raw-html-code">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+  ...
+&lt;/html&gt;
+                            </code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+        
+        <!-- FOOTER -->
+        <footer class="app-footer">
+            <p>Developed with Python, BeautifulSoup & FastAPI. Antigravity Scraper System &copy; 2026.</p>
+        </footer>
+    </div>
+    
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div class="toast-container" id="toast-container"></div>
+    
+    <!-- Custom scripts -->
+    <script src="js/app.js"></script>
+</body>
+</html>
