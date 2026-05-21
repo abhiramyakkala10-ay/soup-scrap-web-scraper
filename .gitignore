@@ -1,0 +1,6 @@
+# Ignore the virtual environment folder
+AYSTUDY/
+
+# Ignore Python cache files
+__pycache__/
+*.pyc
