@@ -1,6 +1,21 @@
-# Ignore the virtual environment folder
-AYSTUDY/
+# Virtual environment
+venv/
+.venv/
 
-# Ignore Python cache files
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+*.pyo
+
+# Environment variables (keeps your secrets safe!)
+.env
+
+# OS files
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Gemini/AI
+brain/
